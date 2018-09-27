@@ -1,0 +1,29 @@
+---
+title: "Statsbomb"
+output: html_notebook
+---
+
+Download free data and select only WC 2018 data.
+
+```{r}
+install.packages("devtools")
+install.packages("data.table")
+devtools::install_github("statsbomb/StatsBombR")
+library(StatsBombR)
+library(data.table)
+StatsBombData <- as.data.table(StatsBombFreeEvents())
+
+Comp <- as.data.table(FreeCompetitions())
+
+Matches <- as.data.table(FreeMatches(Comp$competition_id))
+
+WCMatches <- as.data.table(Matches$match_id[Matches$competition.competition_id == 43])
+WCMatches2 <- WCMatches[, .(match_id = V1)]
+
+setkey(StatsBombData, match_id)
+setkey(WCMatches2, match_id)
+
+WCEvents <- merge(WCMatches2, StatsBombData, all.x = TRUE)
+
+```
+Keep only rows with shots, and relevant columns.
